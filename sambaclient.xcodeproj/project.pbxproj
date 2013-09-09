@@ -1,0 +1,254 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FC06FC0617C7881900032E34 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC06FC0517C7881900032E34 /* main.cpp */; };
+		FC06FC0817C7881900032E34 /* sambaclient.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC06FC0717C7881900032E34 /* sambaclient.1 */; };
+		FCC8CC9317DD9E9B00B0D524 /* libsmbclient.dylib.0 in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FC06FC0017C7881900032E34 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				FC06FC0817C7881900032E34 /* sambaclient.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		FC06FC0217C7881900032E34 /* sambaclient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sambaclient; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC06FC0517C7881900032E34 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		FC06FC0717C7881900032E34 /* sambaclient.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = sambaclient.1; sourceTree = "<group>"; };
+		FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libnetapi.dylib.0; sourceTree = "<group>"; };
+		FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsmbclient.dylib.0; sourceTree = "<group>"; };
+		FCC8CC9017DD9E6700B0D524 /* libsmbclient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libsmbclient.h; sourceTree = "<group>"; };
+		FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtalloc.dylib.2.0.5; sourceTree = "<group>"; };
+		FCC8CC9217DD9E6700B0D524 /* libtdb.dylib.1.2.9 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtdb.dylib.1.2.9; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FC06FBFF17C7881900032E34 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCC8CC9317DD9E9B00B0D524 /* libsmbclient.dylib.0 in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FC06FBF917C7881900032E34 = {
+			isa = PBXGroup;
+			children = (
+				FC06FC0417C7881900032E34 /* sambaclient */,
+				FC06FC0317C7881900032E34 /* Products */,
+				FCC8CC8D17DD9E6700B0D524 /* lib */,
+			);
+			sourceTree = "<group>";
+		};
+		FC06FC0317C7881900032E34 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FC06FC0217C7881900032E34 /* sambaclient */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FC06FC0417C7881900032E34 /* sambaclient */ = {
+			isa = PBXGroup;
+			children = (
+				FC06FC0517C7881900032E34 /* main.cpp */,
+				FC06FC0717C7881900032E34 /* sambaclient.1 */,
+			);
+			path = sambaclient;
+			sourceTree = "<group>";
+		};
+		FCC8CC8D17DD9E6700B0D524 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */,
+				FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */,
+				FCC8CC9017DD9E6700B0D524 /* libsmbclient.h */,
+				FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */,
+				FCC8CC9217DD9E6700B0D524 /* libtdb.dylib.1.2.9 */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FC06FC0117C7881900032E34 /* sambaclient */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FC06FC0B17C7881900032E34 /* Build configuration list for PBXNativeTarget "sambaclient" */;
+			buildPhases = (
+				FC06FBFE17C7881900032E34 /* Sources */,
+				FC06FBFF17C7881900032E34 /* Frameworks */,
+				FC06FC0017C7881900032E34 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = sambaclient;
+			productName = sambaclient;
+			productReference = FC06FC0217C7881900032E34 /* sambaclient */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FC06FBFA17C7881900032E34 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = AsdeqLabs;
+			};
+			buildConfigurationList = FC06FBFD17C7881900032E34 /* Build configuration list for PBXProject "sambaclient" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = FC06FBF917C7881900032E34;
+			productRefGroup = FC06FC0317C7881900032E34 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FC06FC0117C7881900032E34 /* sambaclient */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FC06FBFE17C7881900032E34 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FC06FC0617C7881900032E34 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		FC06FC0917C7881900032E34 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		FC06FC0A17C7881900032E34 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		FC06FC0C17C7881900032E34 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		FC06FC0D17C7881900032E34 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/lib\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FC06FBFD17C7881900032E34 /* Build configuration list for PBXProject "sambaclient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FC06FC0917C7881900032E34 /* Debug */,
+				FC06FC0A17C7881900032E34 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FC06FC0B17C7881900032E34 /* Build configuration list for PBXNativeTarget "sambaclient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FC06FC0C17C7881900032E34 /* Debug */,
+				FC06FC0D17C7881900032E34 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FC06FBFA17C7881900032E34 /* Project object */;
+}
