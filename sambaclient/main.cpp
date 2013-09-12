@@ -81,7 +81,7 @@ SMBCCTX* create_smbctx()
     }
     ctx = smbc_set_context(NULL);
     
-    //smbc_setDebug(ctx, debuglevel);
+    smbc_setDebug(ctx, debuglevel);
     //smbc_setFunctionAuthData(ctx, smbc_auth_fn);
     
     /*
@@ -93,6 +93,19 @@ SMBCCTX* create_smbctx()
      */
     
     smbc_setOptionFullTimeNames(ctx, 1);
+    //smbc_setOptionUseKerberos(ctx, 1);
+	//smbc_setOptionFallbackAfterKerberos(ctx, 1);
+    
+    smbc_setOptionNoAutoAnonymousLogin(ctx, 0);    
+    smbc_setOptionUseCCache(ctx, 1);
+    
+    //smbc_setOptionDebugToStderr(ctx,1);
+    //smbc_setNetbiosName(ctx, "edgesouth");
+    
+    
+    /** Set the workgroup used for making connections */
+    
+    //smbc_setWorkgroup(ctx, "edgesouth.com");
     
     return ctx;
 }
@@ -146,7 +159,7 @@ void writeKeyVal(ostream& out, const string& key, long val)
 
 void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string path)
 {
-    char buffer[32768];
+    char buffer[32768 * 10];
     
     struct stat     st;
     
@@ -168,27 +181,34 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string pat
         if (name.empty() || name == "." || name == "..")
             continue;
 
+        string fullPath = path;
+        if (fullPath.empty() || fullPath[fullPath.length() - 1] != '/')
+        {
+            fullPath += "/";
+        }
+        fullPath +=  name;
+        
         int type = dirent->smbc_type;
+        
+        
         switch (type)
         {
             case SMBC_WORKGROUP:
             case SMBC_SERVER:
-                break; // todo
             case SMBC_FILE_SHARE:
+                writeKeyVal(out, "url", fullPath);
+                writeKeyVal(out, "name", name);
+                writeKeyVal(out, "type", type);
+                break;
+                
             case SMBC_DIR:
             case SMBC_FILE:
-                string fullPath = path;
-                if (fullPath.empty() || fullPath[fullPath.length() - 1] != '/')
-                {
-                    fullPath += "/";
-                }
-                fullPath +=  name;
+                
 
                 writeKeyVal(out, "url", fullPath);
                 writeKeyVal(out, "name", name);
 
                 writeKeyVal(out, "type", type);
-                
                 
                 if (smbc_stat(fullPath.c_str(), &st) < 0)
                 {
@@ -198,7 +218,7 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string pat
                 else
                 {
                     writeKeyVal(out, "size", st.st_size);
-                    writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);
+                    writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
 
                 }
                 
@@ -220,8 +240,37 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string pat
                         writeKeyVal(out, "xattr", str );
                         
                     }
+                    
+                    const char* the_aclSid = strdup("system.nt_sec_desc.*");
+                    
+                    ret = smbc_getxattr(url, the_aclSid, buffer, sizeof(buffer));
+                    if (ret < 0)
+                    {
+                        printError(errno, path, "Could not read ACL.");
+                        
+                    }
+                    else
+                    {
+                        string str = buffer;
+                        writeKeyVal(out, "xattrSid", str );
+                        
+                    }
+                    
                 }
-                       
+                
+                // list all attributes
+                string attrList = buffer;
+                if (smbc_listxattr(fullPath.c_str(),
+                                  buffer,
+                                  sizeof(buffer)) == 0 )
+                {
+                    writeKeyVal(out, "attrs", attrList);
+                }
+                else
+                {
+                    printError(errno, fullPath, "Could not read xattr list.");
+                }
+                
                 
                 if (recursive && type != SMBC_FILE)
                 {
