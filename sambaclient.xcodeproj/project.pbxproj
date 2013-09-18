@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2CCE993917E6DC6400FCCED3 /* libnetapi.dylib.0 in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */; };
+		2CCE993B17E6DE6D00FCCED3 /* libtalloc.dylib.2.0.5 in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */; };
+		2CCE993D17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */; };
 		FC06FC0617C7881900032E34 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC06FC0517C7881900032E34 /* main.cpp */; };
 		FC06FC0817C7881900032E34 /* sambaclient.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC06FC0717C7881900032E34 /* sambaclient.1 */; };
 		FCC8CC9317DD9E9B00B0D524 /* libsmbclient.dylib.0 in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */; };
@@ -26,12 +29,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2CCE992B17E68FC000FCCED3 /* libsmbclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libsmbclient.h; path = include/libsmbclient.h; sourceTree = "<group>"; };
+		2CCE992C17E68FC000FCCED3 /* netapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = netapi.h; path = include/netapi.h; sourceTree = "<group>"; };
+		2CCE992D17E68FC000FCCED3 /* smb_share_modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = smb_share_modes.h; path = include/smb_share_modes.h; sourceTree = "<group>"; };
+		2CCE992E17E68FC000FCCED3 /* talloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = talloc.h; path = include/talloc.h; sourceTree = "<group>"; };
+		2CCE992F17E68FC000FCCED3 /* tdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tdb.h; path = include/tdb.h; sourceTree = "<group>"; };
+		2CCE993517E697B700FCCED3 /* samba-3.6.18 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "samba-3.6.18"; sourceTree = "<group>"; };
+		2CCE993617E6C83A00FCCED3 /* smbheader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = smbheader.h; sourceTree = "<group>"; };
+		2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsmbsharemodes.dylib.0; path = lib/libsmbsharemodes.dylib.0; sourceTree = "<group>"; };
+		2CCE993F17E7F30000FCCED3 /* security.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = security.h; sourceTree = "<group>"; };
 		FC06FC0217C7881900032E34 /* sambaclient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sambaclient; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC06FC0517C7881900032E34 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FC06FC0717C7881900032E34 /* sambaclient.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = sambaclient.1; sourceTree = "<group>"; };
 		FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libnetapi.dylib.0; sourceTree = "<group>"; };
 		FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsmbclient.dylib.0; sourceTree = "<group>"; };
-		FCC8CC9017DD9E6700B0D524 /* libsmbclient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libsmbclient.h; sourceTree = "<group>"; };
 		FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtalloc.dylib.2.0.5; sourceTree = "<group>"; };
 		FCC8CC9217DD9E6700B0D524 /* libtdb.dylib.1.2.9 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libtdb.dylib.1.2.9; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -41,6 +52,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CCE993D17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 in Frameworks */,
+				2CCE993B17E6DE6D00FCCED3 /* libtalloc.dylib.2.0.5 in Frameworks */,
+				2CCE993917E6DC6400FCCED3 /* libnetapi.dylib.0 in Frameworks */,
 				FCC8CC9317DD9E9B00B0D524 /* libsmbclient.dylib.0 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,9 +62,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2CCE992A17E68FA700FCCED3 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				2CCE992B17E68FC000FCCED3 /* libsmbclient.h */,
+				2CCE992C17E68FC000FCCED3 /* netapi.h */,
+				2CCE992D17E68FC000FCCED3 /* smb_share_modes.h */,
+				2CCE992E17E68FC000FCCED3 /* talloc.h */,
+				2CCE992F17E68FC000FCCED3 /* tdb.h */,
+				2CCE993617E6C83A00FCCED3 /* smbheader.h */,
+				2CCE993F17E7F30000FCCED3 /* security.h */,
+			);
+			name = include;
+			sourceTree = "<group>";
+		};
 		FC06FBF917C7881900032E34 = {
 			isa = PBXGroup;
 			children = (
+				2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */,
+				2CCE993517E697B700FCCED3 /* samba-3.6.18 */,
+				2CCE992A17E68FA700FCCED3 /* include */,
 				FC06FC0417C7881900032E34 /* sambaclient */,
 				FC06FC0317C7881900032E34 /* Products */,
 				FCC8CC8D17DD9E6700B0D524 /* lib */,
@@ -79,7 +110,6 @@
 			children = (
 				FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */,
 				FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */,
-				FCC8CC9017DD9E6700B0D524 /* libsmbclient.h */,
 				FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */,
 				FCC8CC9217DD9E6700B0D524 /* libtdb.dylib.1.2.9 */,
 			);
@@ -167,13 +197,20 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-undefined",
+					dynamic_lookup,
+					"-flat_namespace",
+				);
 				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -194,36 +231,55 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
 		FC06FC0C17C7881900032E34 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"samba-3.6.18",
+					"samba-3.6.18/source3",
+					"samba-3.6.18/lib",
+					"samba-3.6.18/source3/include",
+					"samba-3.6.18/lib/replace",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/lib\"",
 				);
+				"OTHER_LDFLAGS[arch=*]" = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
 		FC06FC0D17C7881900032E34 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"samba-3.6.18",
+					"samba-3.6.18/source3",
+					"samba-3.6.18/lib",
+					"samba-3.6.18/source3/include",
+					"samba-3.6.18/lib/replace",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/lib\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
