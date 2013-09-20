@@ -99,7 +99,7 @@ SMBCCTX* create_smbctx()
     //smbc_setOptionCaseSensitive(ctx, 0);
     
     // one connection per server
-    smbc_setOptionOneSharePerServer(ctx,0);
+    smbc_setOptionOneSharePerServer(ctx,1);
     return ctx;
 }
 
@@ -162,7 +162,7 @@ static struct cli_state* connect_one(string server, string share)
     // apparently we need to zero the sockaddr structure otherwise stuff breaks
 	zero_sockaddr(&ss);
 
-    // connects to the share
+    // connects to the share - signing state is on
 	nt_status = cli_full_connection(&c, "AsdeqDocs Server", server.c_str(),
                                     &ss,
                                     0,
@@ -172,14 +172,23 @@ static struct cli_state* connect_one(string server, string share)
                                     workgroup,
                                     password,
                                     flags,
-                                    0);
+                                    1);
     
     
 	if (!NT_STATUS_IS_OK(nt_status))
     {
 		return NULL;
 	}
-
+/*
+    nt_status = cli_cm_force_encryption(c,
+                                        username,
+                                        password,
+                                        workgroup,
+                                        share.c_str());
+    if (!NT_STATUS_IS_OK(nt_status))
+    {
+        cli_shutdown(c);
+    }*/
 	return c;
 }
 
@@ -237,7 +246,7 @@ static void print_ace(struct cli_state *cli, FILE *f, struct security_ace *ace)
 
 
 
-void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string path)
+void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, bool children, string path)
 {
     char buffer[32768 * 10];
     
@@ -248,10 +257,7 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string pat
     struct smbc_dirent	*dirent;
 
 
-    fd = smbc_getFunctionOpendir(ctx)(ctx, path.c_str());
-    if (fd == NULL)
-        printErrorAndExit(errno, path, "Could not open path to enumerate.");
-    
+       
     // open second connection for apple ACL's - horrible but this is where we ended up
     
     struct cli_state *cli;
@@ -264,142 +270,167 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, string pat
     {
         cli = connect_one( server, share );
     }
-    while((dirent = smbc_getFunctionReaddir(ctx)(ctx, fd)) != NULL)
+    // if we just want the node then we filter on the entry.
+    // this could probably be optimised.
+    string filterName;
+    if (!children)
     {
-        
-        
-        string name = dirent->name;
-        
-        if (name.empty() || name == "." || name == "..")
-            continue;
-
-        string fullPath = path;
-        if (fullPath.empty() || fullPath[fullPath.length() - 1] != '/')
-        {
-            fullPath += "/";
-        }
-        fullPath +=  name;
-        
-        int type = dirent->smbc_type;
-        
-        
-        switch (type)
-        {
-            case SMBC_WORKGROUP:
-            case SMBC_SERVER:
-            case SMBC_FILE_SHARE:
-
-                writeKeyVal(out, "url", fullPath);
-                writeKeyVal(out, "name", name);
-                writeKeyVal(out, "type", type);
-                
-                break;
-                
-            case SMBC_DIR:
-            case SMBC_FILE:
-                
-
-                writeKeyVal(out, "url", fullPath);
-                writeKeyVal(out, "name", name);
-
-                writeKeyVal(out, "type", type);
-                
-                if (smbc_stat(fullPath.c_str(), &st) < 0)
-                {
-                    printError(errno, fullPath, "Could not get attributes of path.");
-                    
-                }
-                else
-                {
-                    writeKeyVal(out, "size", st.st_size);
-                    writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
-
-                }
-                
-                if (acls)
-                {
-                    
-                    const char* the_acl = strdup("system.nt_sec_desc.*+");
-                    //const char* the_acl = "system.nt_sec_desc.*"; // "system.nt_sec_desc.*+";
-                    const char *url = fullPath.c_str();
-                    
-                    int ret = smbc_getxattr(url, the_acl, buffer, sizeof(buffer));
-                    if (ret == 0)                   
-                    {
-                        string str = buffer;
-                        writeKeyVal(out, "xattr", str );
-                        
-                    }
-                    
-                    const char* the_aclSid = strdup("system.nt_sec_desc.*");
-                    // try to read the sids from the attributes, if this doesn't work then we can call
-                    // the security discriptor function which seems to work okay on OS X.
-                    ret = smbc_getxattr(url, the_aclSid, buffer, sizeof(buffer));
-                    if (ret == 0)
-                    {
-                        string str = buffer;
-                        writeKeyVal(out, "xattrSid", str );
-
-                        
-                    }
-                    else if (cli)
-                    {
-                        // OSX Specific to get the ACL's from the file.
-                        
-                        // calculate share path - parse the two first tokens and throw away
-                        strtok(strdup(fullPath.substr(6, string::npos).c_str()), "/");
-                        strtok(NULL, "/");
-                        string filePath = "";
-                        char *pch = strtok(NULL, "/");
-                        
-                        while (pch!=NULL)
-                        {
-                            filePath+="\\";
-                            filePath +=pch;
-                            pch = strtok(NULL, "/");
-                        }
-
-                        // we use fprintf C functions from the adapted sample code.
-                        // I could have rewritten it but in the interest of getting it working I left it as is.
-                        fprintf(stdout, "xattrSid: ");
-                        // this gets the security descriptor from the file
-                        security_descriptor* sd = get_secdesc(cli, filePath.c_str());
-                        if (sd)
-                        {                        
-                            // enumerate and print the aces to stdout
-                            for (int i = 0; sd->dacl && i < sd->dacl->num_aces; i++)
-                            {                                                        
-                                struct security_ace *ace = &sd->dacl->aces[i];
-                                if (i>0)
-                                    fprintf(stdout, ",");
-                                fprintf(stdout, "ACL:");
-                                print_ace(cli, stdout, ace);
-                        
-                            }
-                        }
-                        fprintf(stdout, "\n");
-                        
-                        
-                    }
-                }
-                
-                                
-                // handle recursive
-                if (recursive && type != SMBC_FILE)
-                {
-                    enumerate(out, ctx, recursive, acls, fullPath);
-                }
-                break;
-        
-        }
-
-        
+        long posn = path.find_last_of("/", path.length()-2);
+        filterName = path.substr(posn+1, string::npos);
+        path = path.substr(0, posn);
+        // if last char is a slash then remove it.
+        if ( *(filterName.end()-1)=='/')
+            filterName.pop_back();
     }
     
-    TALLOC_FREE(frame);
+    fd = smbc_getFunctionOpendir(ctx)(ctx, path.c_str());
+    if (fd == NULL)
+        printErrorAndExit(errno, path, "Could not open path to enumerate.");
+
+    
+    while((dirent = smbc_getFunctionReaddir(ctx)(ctx, fd)) != NULL)
+    {
+
+        
+        string name = dirent->name;
+        int type = dirent->smbc_type;
+        if (filterName.length()==0 || (filterName.compare(name)==0 && (type==SMBC_DIR || type==SMBC_FILE_SHARE)))
+        {
+        
+            if (name.empty() || name == "." || name == "..")
+                continue;
+
+            string fullPath = path;
+            if (fullPath.empty() || fullPath[fullPath.length() - 1] != '/')
+            {
+                fullPath += "/";
+            }
+            fullPath +=  name;
+            
+
+            
+            
+            switch (type)
+            {
+                case SMBC_WORKGROUP:
+                case SMBC_SERVER:
+                
+
+                    writeKeyVal(out, "url", fullPath);
+                    writeKeyVal(out, "name", name);
+                    writeKeyVal(out, "type", type);
+                
+                    break;
+                case SMBC_FILE_SHARE:
+                case SMBC_DIR:
+                case SMBC_FILE:
+                    
+
+                    writeKeyVal(out, "url", fullPath);
+                    writeKeyVal(out, "name", name);
+
+                    writeKeyVal(out, "type", type);
+                    
+                    if (smbc_stat(fullPath.c_str(), &st) < 0)
+                    {
+                        printError(errno, fullPath, "Could not get attributes of path.");
+                        
+                    }
+                    else
+                    {
+                        writeKeyVal(out, "size", st.st_size);
+                        writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
+
+                    }
+                
+                    // windows seems to have stopped resolving these sid attributes for some reason
+                    if (acls)
+                    {
+                        
+                        const char* the_acl = strdup("system.nt_sec_desc.*+");
+                        //const char* the_acl = "system.nt_sec_desc.*"; // "system.nt_sec_desc.*+";
+                        const char *url = fullPath.c_str();
+                        
+                        int ret = smbc_getxattr(url, the_acl, buffer, sizeof(buffer));
+                        if (ret == 0)                   
+                        {
+                            string str = buffer;
+                            writeKeyVal(out, "xattr", str );
+                            
+                        }
+                        
+                        const char* the_aclSid = strdup("system.nt_sec_desc.*");
+                        // try to read the sids from the attributes, if this doesn't work then we can call
+                        // the security discriptor function which seems to work okay on OS X.
+                        ret = smbc_getxattr(url, the_aclSid, buffer, sizeof(buffer));
+                        if (ret == 0)
+                        {
+                            string str = buffer;
+                            writeKeyVal(out, "xattrSid", str );
+
+                            
+                        }
+                        else if (cli)
+                        {
+                            // OSX Specific to get the ACL's from the file.
+                            
+                            // calculate share path - parse the two first tokens and throw away
+                            strtok(strdup(fullPath.substr(6, string::npos).c_str()), "/");
+                            strtok(NULL, "/");
+                            string filePath = "";
+                            char *pch = strtok(NULL, "/");
+                            
+                            while (pch!=NULL)
+                            {
+                                filePath+="\\";
+                                filePath +=pch;
+                                pch = strtok(NULL, "/");
+                            }
+
+                            // we use fprintf C functions from the adapted sample code.
+                            // I could have rewritten it but in the interest of getting it working I left it as is.
+                            fprintf(stdout, "xattrSid: ");
+                            // this gets the security descriptor from the file
+                            security_descriptor* sd = get_secdesc(cli, filePath.c_str());
+                            if (sd)
+                            {                        
+                                // enumerate and print the aces to stdout
+                                for (int i = 0; sd->dacl && i < sd->dacl->num_aces; i++)
+                                {                                                        
+                                    struct security_ace *ace = &sd->dacl->aces[i];
+                                    if (i>0)
+                                        fprintf(stdout, ",");
+                                    fprintf(stdout, "ACL:");
+                                    print_ace(cli, stdout, ace);
+                            
+                                }
+                            }
+                            fprintf(stdout, "\n");
+                            
+                            
+                        }
+                    }
+                    
+            }
+            
+            // handle recursive
+            if (recursive && type != SMBC_FILE && children)
+            {
+                enumerate(out, ctx, recursive, acls, true, fullPath);
+            }
+            if (filterName.length()>0)
+                break;        
+        }
+        
+        
+    }
+    // do we need to close our cli connection?
     
     smbc_getFunctionClose(ctx)(ctx, fd);
 
+    if (cli)
+        cli_shutdown(cli);
+    TALLOC_FREE(frame);
     
 
 }
@@ -514,9 +545,10 @@ int main(int argc, const char * argv[])
     else if (command.find("enumerate") != string::npos)
     {
         bool acls = command.find("acls") != string::npos;
+        bool children = command.find("children") != string::npos;
         bool recursive = command.find("recursive") != string::npos;
         
-        enumerate(cout, ctx, recursive, acls, path);
+        enumerate(cout, ctx, recursive, acls, children, path);
     }
     else if (command == "read")
     {

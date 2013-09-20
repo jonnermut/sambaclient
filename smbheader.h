@@ -41,7 +41,16 @@ typedef char fstring[FSTRING_LEN];
 #define FILE_OVERWRITE 4		/* File exists overwrite. File not exist fail. */
 #define FILE_OVERWRITE_IF 5		/* File exists overwrite. File not exist create. */
 
+// conncection flags
+#define CLI_FULL_CONNECTION_DONT_SPNEGO 0x0001
+#define CLI_FULL_CONNECTION_USE_KERBEROS 0x0002
+#define CLI_FULL_CONNECTION_ANONYMOUS_FALLBACK 0x0004
+#define CLI_FULL_CONNECTION_FALLBACK_AFTER_KERBEROS 0x0008
+#define CLI_FULL_CONNECTION_OPLOCKS 0x0010
+#define CLI_FULL_CONNECTION_LEVEL_II_OPLOCKS 0x0020
+#define CLI_FULL_CONNECTION_USE_CCACHE 0x0040
 
+    
 const int SEC_STD_READ_CONTROL     = 0x00020000;
 
 #define READ_CONTROL_ACCESS  SEC_STD_READ_CONTROL
@@ -292,6 +301,14 @@ NTSTATUS cli_set_secdesc(struct cli_state *cli, uint16_t fnum,
                          struct security_descriptor *sd);
 
 NTSTATUS cli_close(struct cli_state *cli, uint16_t fnum);
+
+    NTSTATUS cli_cm_force_encryption(struct cli_state *c,
+                                     const char *username,
+                                     const char *password,
+                                     const char *domain,
+                                     const char *sharename);
+    
+void cli_shutdown(struct cli_state *cli);
     
 char *sid_to_fstring(fstring sidstr_out, const struct dom_sid *sid);
 
