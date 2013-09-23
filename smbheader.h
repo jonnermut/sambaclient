@@ -25,8 +25,37 @@ extern "C"
 #define FSTRING_LEN 256
 typedef char fstring[FSTRING_LEN];
 
+// sid type
     
-
+enum lsa_SidType
+#ifndef USE_UINT_ENUMS
+    {
+        SID_NAME_USE_NONE=(int)(0),
+        SID_NAME_USER=(int)(1),
+        SID_NAME_DOM_GRP=(int)(2),
+        SID_NAME_DOMAIN=(int)(3),
+        SID_NAME_ALIAS=(int)(4),
+        SID_NAME_WKN_GRP=(int)(5),
+        SID_NAME_DELETED=(int)(6),
+        SID_NAME_INVALID=(int)(7),
+        SID_NAME_UNKNOWN=(int)(8),
+        SID_NAME_COMPUTER=(int)(9)
+    }
+#else
+    { __donnot_use_enum_lsa_SidType=0x7FFFFFFF}
+#define SID_NAME_USE_NONE ( 0 )
+#define SID_NAME_USER ( 1 )
+#define SID_NAME_DOM_GRP ( 2 )
+#define SID_NAME_DOMAIN ( 3 )
+#define SID_NAME_ALIAS ( 4 )
+#define SID_NAME_WKN_GRP ( 5 )
+#define SID_NAME_DELETED ( 6 )
+#define SID_NAME_INVALID ( 7 )
+#define SID_NAME_UNKNOWN ( 8 )
+#define SID_NAME_COMPUTER ( 9 )
+#endif
+        ;
+        
 /* ShareAccess field. */
 #define FILE_SHARE_NONE 0 /* Cannot be used in bitmask. */
 #define FILE_SHARE_READ 1
@@ -54,6 +83,8 @@ typedef char fstring[FSTRING_LEN];
 const int SEC_STD_READ_CONTROL     = 0x00020000;
 
 #define READ_CONTROL_ACCESS  SEC_STD_READ_CONTROL
+        
+#define GENERIC_EXECUTE_ACCESS SEC_GENERIC_EXECUTE      /* (1<<29) */
 
 #define MAX_NETBIOSNAME_LEN 16
 /* DOS character, NetBIOS namestring. Type used on the wire. */
@@ -121,7 +152,29 @@ enum smb_read_errors {
 	SMB_READ_BAD_DECRYPT
 };
 
-
+        enum ndr_err_code {
+            NDR_ERR_SUCCESS = 0,
+            NDR_ERR_ARRAY_SIZE,
+            NDR_ERR_BAD_SWITCH,
+            NDR_ERR_OFFSET,
+            NDR_ERR_RELATIVE,
+            NDR_ERR_CHARCNV,
+            NDR_ERR_LENGTH,
+            NDR_ERR_SUBCONTEXT,
+            NDR_ERR_COMPRESSION,
+            NDR_ERR_STRING,
+            NDR_ERR_VALIDATE,
+            NDR_ERR_BUFSIZE,
+            NDR_ERR_ALLOC,
+            NDR_ERR_RANGE,
+            NDR_ERR_TOKEN,
+            NDR_ERR_IPV4ADDRESS,
+            NDR_ERR_IPV6ADDRESS,
+            NDR_ERR_INVALID_POINTER,
+            NDR_ERR_UNREAD_BYTES,
+            NDR_ERR_NDR64
+        };
+        
 /* used to hold an arbitrary blob of data */
 typedef struct datablob {
 	uint8_t *data;
@@ -146,6 +199,133 @@ struct ndr_syntax_id {
 }/* [public] */;
 
 
+        /* this is the base structure passed to routines that
+         parse MSRPC formatted data
+         
+         note that in Samba4 we use separate routines and structures for
+         MSRPC marshalling and unmarshalling. Also note that these routines
+         are being kept deliberately very simple, and are not tied to a
+         particular transport
+         */
+        struct ndr_pull {
+            uint32_t flags; /* LIBNDR_FLAG_* */
+            uint8_t *data;
+            uint32_t data_size;
+            uint32_t offset;
+            
+            uint32_t relative_highest_offset;
+            uint32_t relative_base_offset;
+            uint32_t relative_rap_convert;
+            struct ndr_token_list *relative_base_list;
+            
+            struct ndr_token_list *relative_list;
+            struct ndr_token_list *array_size_list;
+            struct ndr_token_list *array_length_list;
+            struct ndr_token_list *switch_list;
+            
+            TALLOC_CTX *current_mem_ctx;
+            
+            /* this is used to ensure we generate unique reference IDs
+             between request and reply */
+            uint32_t ptr_count;
+        };
+        
+        /* structure passed to functions that generate NDR formatted data */
+        struct ndr_push {
+            uint32_t flags; /* LIBNDR_FLAG_* */
+            uint8_t *data;
+            uint32_t alloc_size;
+            uint32_t offset;
+            
+            uint32_t relative_base_offset;
+            uint32_t relative_end_offset;
+            struct ndr_token_list *relative_base_list;
+            
+            struct ndr_token_list *switch_list;
+            struct ndr_token_list *relative_list;
+            struct ndr_token_list *relative_begin_list;
+            struct ndr_token_list *nbt_string_list;
+            struct ndr_token_list *dns_string_list;
+            struct ndr_token_list *full_ptr_list;
+            
+            /* this is used to ensure we generate unique reference IDs */
+            uint32_t ptr_count;
+        };
+        
+        /* structure passed to functions that print IDL structures */
+        struct ndr_print {
+            uint32_t flags; /* LIBNDR_FLAG_* */
+            uint32_t depth;
+            struct ndr_token_list *switch_list;
+            void (*print)(struct ndr_print *, const char *, ...) PRINTF_ATTRIBUTE(2,3);
+            void *private_data;
+            bool no_newline;
+        };
+    
+        /* these are used when generic fn pointers are needed for ndr push/pull fns */
+        typedef enum ndr_err_code (*ndr_push_flags_fn_t)(struct ndr_push *, int ndr_flags, const void *);
+        typedef enum ndr_err_code (*ndr_pull_flags_fn_t)(struct ndr_pull *, int ndr_flags, void *);
+        typedef void (*ndr_print_fn_t)(struct ndr_print *, const char *, const void *);
+        typedef void (*ndr_print_function_t)(struct ndr_print *, const char *, int, const void *);
+        
+
+        
+        struct ndr_interface_call_pipe {
+            const char *name;
+            const char *chunk_struct_name;
+            size_t chunk_struct_size;
+            ndr_push_flags_fn_t ndr_push;
+            ndr_pull_flags_fn_t ndr_pull;
+            ndr_print_fn_t ndr_print;
+        };
+        
+        struct ndr_interface_call_pipes {
+            uint32_t num_pipes;
+            const struct ndr_interface_call_pipe *pipes;
+        };
+        
+        struct ndr_interface_call {
+            const char *name;
+            size_t struct_size;
+            ndr_push_flags_fn_t ndr_push;
+            ndr_pull_flags_fn_t ndr_pull;
+            ndr_print_function_t ndr_print;
+            struct ndr_interface_call_pipes in_pipes;
+            struct ndr_interface_call_pipes out_pipes;
+        };
+        
+        struct ndr_interface_string_array {
+            uint32_t count;
+            const char * const *names;
+        };
+        
+        struct ndr_interface_table {
+            const char *name;
+            struct ndr_syntax_id syntax_id;
+            const char *helpstring;
+            uint32_t num_calls;
+            const struct ndr_interface_call *calls;
+            const struct ndr_interface_string_array *endpoints;
+            const struct ndr_interface_string_array *authservices;
+        };
+        
+        struct ndr_interface_list {
+            struct ndr_interface_list *prev, *next;
+            const struct ndr_interface_table *table;
+        };
+        
+extern const struct ndr_interface_table ndr_table_lsarpc;        
+
+        
+        
+        
+        
+        
+        struct policy_handle {
+            uint32_t handle_type;
+            struct GUID uuid;
+        }/* [public] */;
+        
 struct rpc_pipe_client {
 	struct rpc_pipe_client *prev, *next;
     
@@ -335,5 +515,40 @@ char *sid_to_fstring(fstring sidstr_out, const struct dom_sid *sid);
         { "FULL",   0x001f01ff },
         { NULL, 0 },
     };
-}
+
+
+NTSTATUS cli_tcon_andx(struct cli_state *cli, const char *share,
+                       const char *dev, const char *pass, int passlen);
+
+NTSTATUS cli_tdis(struct cli_state *cli);
+
+    NTSTATUS cli_rpc_pipe_open_noauth(struct cli_state *cli,
+                                      const struct ndr_syntax_id *interface,
+                                      struct rpc_pipe_client **presult);
+
+
+    NTSTATUS rpccli_lsa_open_policy(struct rpc_pipe_client *cli,
+                                    TALLOC_CTX *mem_ctx,
+                                    bool sec_qos, uint32 des_access,
+                                    struct policy_handle *pol);
+
+    
+    NTSTATUS rpccli_lsa_lookup_names(struct rpc_pipe_client *cli,
+                                     TALLOC_CTX *mem_ctx,
+                                     struct policy_handle *pol, int num_names,
+                                     const char **names,
+                                     const char ***dom_names,
+                                     int level,
+                                     struct dom_sid **sids,
+                                     enum lsa_SidType **types);
+    
+    NTSTATUS rpccli_lsa_lookup_sids(struct rpc_pipe_client *cli,
+                                    TALLOC_CTX *mem_ctx,
+                                    struct policy_handle *pol,
+                                    int num_sids,
+                                    const struct dom_sid *sids,
+                                    char ***pdomains,
+                                    char ***pnames,
+                                    enum lsa_SidType **ptypes);
+    }
 #endif

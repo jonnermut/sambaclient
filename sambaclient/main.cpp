@@ -22,7 +22,6 @@
 #include <vector>
 #include <algorithm>
 
-
 using namespace std;
 
 const int BUFFER_SIZE = 4096;
@@ -99,7 +98,7 @@ SMBCCTX* create_smbctx()
     //smbc_setOptionCaseSensitive(ctx, 0);
     
     // one connection per server
-    smbc_setOptionOneSharePerServer(ctx,1);
+    smbc_setOptionOneSharePerServer(ctx, 1);
     return ctx;
 }
 
@@ -224,6 +223,62 @@ static struct security_descriptor *get_secdesc(struct cli_state *cli, const char
     return sd;
 }
 
+/*****************************************************
+look up the sid
+ *******************************************************/
+
+static NTSTATUS cli_lsa_lookup_sid(struct cli_state *cli,
+                                   const struct dom_sid *sid,
+                                   TALLOC_CTX *mem_ctx,
+                                   enum lsa_SidType *type,
+                                   char **domain, char **name)
+{
+	uint16 orig_cnum = cli->cnum;
+	struct rpc_pipe_client *p = NULL;
+	struct policy_handle handle;
+	NTSTATUS status;
+	TALLOC_CTX *frame = talloc_stackframe();
+	enum lsa_SidType *types;
+	char **domains;
+	char **names;
+    
+	status = cli_tcon_andx(cli, "IPC$", "?????", "", 0);
+	if (!NT_STATUS_IS_OK(status)) {
+		return status;
+	}
+    
+	status = cli_rpc_pipe_open_noauth(cli, &ndr_table_lsarpc.syntax_id,
+                                      &p);
+	if (!NT_STATUS_IS_OK(status)) {
+		goto fail;
+	}
+    
+	status = rpccli_lsa_open_policy(p, talloc_tos(), true,
+                                    GENERIC_EXECUTE_ACCESS, &handle);
+	if (!NT_STATUS_IS_OK(status)) {
+		goto fail;
+	}
+    
+	status = rpccli_lsa_lookup_sids(p, talloc_tos(), &handle, 1, sid,
+                                    &domains, &names, &types);
+	if (!NT_STATUS_IS_OK(status)) {
+		goto fail;
+	}
+    
+	*type = types[0];
+	*domain = talloc_move(mem_ctx, &domains[0]);
+	*name = talloc_move(mem_ctx, &names[0]);
+    
+	status = NT_STATUS_OK;
+fail:
+	TALLOC_FREE(p);
+	cli_tdis(cli);
+	cli->cnum = orig_cnum;
+	TALLOC_FREE(frame);
+	return status;
+}
+
+
 
 
 /* print an ACE on a FILE, using either numeric or ascii representation */
@@ -231,15 +286,41 @@ static void print_ace(struct cli_state *cli, FILE *f, struct security_ace *ace)
 {
 	
 	fstring sidstr;
-//	SidToString(cli, sidstr, &ace->trustee);
+
     sid_to_fstring(sidstr, &ace->trustee);
     
-	fprintf(f, "%s:", sidstr);
+	fprintf(f, "%s", sidstr);
     
     // numeric ace
     
+    char *domain = NULL;
+	char *name = NULL;
+	enum lsa_SidType type;
+	NTSTATUS status;
+
+    
+    status = cli_lsa_lookup_sid(cli, &ace->trustee, talloc_tos(), &type,
+                                &domain, &name);
+    
+	if (NT_STATUS_IS_OK(status))
+    {
+	    
+        if (*domain)
+        {
+            //slprintf(sidstr, sizeof(fstring) - 1, "%s%s%s",
+            //         domain, '\\', name);
+            fprintf(f, "|%s\\%s", domain, name);
+        }
+        else
+        {
+            //fstrcpy(sidstr, name);
+            fprintf(f, "|%s", name);
+        }
+        
+    }
+    
 	//fprintf(f, "%d/0x%x/0x%08x", ace->type, ace->flags, ace->access_mask);
-    fprintf(f, "%d/%d/0x%08x", ace->type, ace->flags, ace->access_mask);
+    fprintf(f, ":%d/%d/0x%08x", ace->type, ace->flags, ace->access_mask);
     
     return;
 }
@@ -330,47 +411,51 @@ void enumerate(ostream& out, SMBCCTX *ctx, bool recursive, bool acls, bool child
                     writeKeyVal(out, "name", name);
 
                     writeKeyVal(out, "type", type);
-                    
-                    if (smbc_stat(fullPath.c_str(), &st) < 0)
+                    if (type!=SMBC_FILE_SHARE)
                     {
-                        printError(errno, fullPath, "Could not get attributes of path.");
-                        
-                    }
-                    else
-                    {
-                        writeKeyVal(out, "size", st.st_size);
-                        writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
+                        if (smbc_stat(fullPath.c_str(), &st) < 0)
+                        {
+                            printError(errno, fullPath, "Could not get attributes of path.");
+                            
+                        }
+                        else
+                        {
+                            writeKeyVal(out, "size", st.st_size);
+                            writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
 
+                        }
                     }
-                
                     // windows seems to have stopped resolving these sid attributes for some reason
                     if (acls)
                     {
+                       // we just use the low level api's to resolve this now - since it works on both Apple and Windows
+                        // however apple can't resolve the usernames
                         
-                        const char* the_acl = strdup("system.nt_sec_desc.*+");
-                        //const char* the_acl = "system.nt_sec_desc.*"; // "system.nt_sec_desc.*+";
-                        const char *url = fullPath.c_str();
-                        
-                        int ret = smbc_getxattr(url, the_acl, buffer, sizeof(buffer));
-                        if (ret == 0)                   
+                        if (!cli)
                         {
-                            string str = buffer;
-                            writeKeyVal(out, "xattr", str );
+                            const char* the_acl = strdup("system.nt_sec_desc.*+");
+                            //const char* the_acl = "system.nt_sec_desc.*"; // "system.nt_sec_desc.*+";
+                            const char *url = fullPath.c_str();
                             
-                        }
-                        
-                        const char* the_aclSid = strdup("system.nt_sec_desc.*");
-                        // try to read the sids from the attributes, if this doesn't work then we can call
-                        // the security discriptor function which seems to work okay on OS X.
-                        ret = smbc_getxattr(url, the_aclSid, buffer, sizeof(buffer));
-                        if (ret == 0)
-                        {
-                            string str = buffer;
-                            writeKeyVal(out, "xattrSid", str );
-
+                            int ret = smbc_getxattr(url, the_acl, buffer, sizeof(buffer));
+                            if (ret == 0)                   
+                            {
+                                string str = buffer;
+                                writeKeyVal(out, "xattr", str );
+                                
+                            }
                             
+                            const char* the_aclSid = strdup("system.nt_sec_desc.*");
+                            // try to read the sids from the attributes, if this doesn't work then we can call
+                            // the security discriptor function which seems to work okay on OS X.
+                            ret = smbc_getxattr(url, the_aclSid, buffer, sizeof(buffer));
+                            if (ret == 0)
+                            {
+                                string str = buffer;
+                                writeKeyVal(out, "xattrSid", str );                                
+                            }
                         }
-                        else if (cli)
+                        else
                         {
                             // OSX Specific to get the ACL's from the file.
                             
