@@ -710,7 +710,7 @@ int main(int argc, const char * argv[])
     if (command.find("wait")!= string::npos)
         wait = true;
     
-    while (wait)
+    do
     {
         if (command.empty())
         {
@@ -772,7 +772,7 @@ int main(int argc, const char * argv[])
         fflush(stdout);
         fflush(stderr);
     }
-    
+    while (wait);
     
     if (cli)
         cli_shutdown(cli);

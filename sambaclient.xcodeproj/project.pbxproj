@@ -30,7 +30,7 @@
 
 /* Begin PBXFileReference section */
 		2C998FFF17FA750500CE5A50 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
-		2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsmbsharemodes.dylib.0; path = lib/libsmbsharemodes.dylib.0; sourceTree = "<group>"; };
+		2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsmbsharemodes.dylib.0; sourceTree = "<group>"; };
 		FC06FC0217C7881900032E34 /* sambaclient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sambaclient; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC06FC0517C7881900032E34 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FC06FC0717C7881900032E34 /* sambaclient.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = sambaclient.1; sourceTree = "<group>"; };
@@ -59,7 +59,6 @@
 			isa = PBXGroup;
 			children = (
 				2C998FFF17FA750500CE5A50 /* include */,
-				2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */,
 				FC06FC0417C7881900032E34 /* sambaclient */,
 				FC06FC0317C7881900032E34 /* Products */,
 				FCC8CC8D17DD9E6700B0D524 /* lib */,
@@ -87,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				FCC8CC8E17DD9E6700B0D524 /* libnetapi.dylib.0 */,
+				2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */,
 				FCC8CC8F17DD9E6700B0D524 /* libsmbclient.dylib.0 */,
 				FCC8CC9117DD9E6700B0D524 /* libtalloc.dylib.2.0.5 */,
 				FCC8CC9217DD9E6700B0D524 /* libtdb.dylib.1.2.9 */,
@@ -180,14 +180,15 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-undefined",
 					dynamic_lookup,
 					"-flat_namespace",
+					"-headerpad_max_install_names",
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.7;
 				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
@@ -214,8 +215,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				SDKROOT = macosx;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx10.7;
 				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
@@ -223,14 +224,17 @@
 		FC06FC0C17C7881900032E34 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"DYLIB_COMPATIBILITY_VERSION[sdk=macosx10.7]" = "";
 				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/lib\"",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = YES;
 				"OTHER_LDFLAGS[arch=*]" = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -238,13 +242,16 @@
 		FC06FC0D17C7881900032E34 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"DYLIB_COMPATIBILITY_VERSION[sdk=macosx10.7]" = "";
 				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/lib\"",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
