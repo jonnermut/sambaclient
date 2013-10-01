@@ -29,15 +29,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2CCE992B17E68FC000FCCED3 /* libsmbclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libsmbclient.h; path = include/libsmbclient.h; sourceTree = "<group>"; };
-		2CCE992C17E68FC000FCCED3 /* netapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = netapi.h; path = include/netapi.h; sourceTree = "<group>"; };
-		2CCE992D17E68FC000FCCED3 /* smb_share_modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = smb_share_modes.h; path = include/smb_share_modes.h; sourceTree = "<group>"; };
-		2CCE992E17E68FC000FCCED3 /* talloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = talloc.h; path = include/talloc.h; sourceTree = "<group>"; };
-		2CCE992F17E68FC000FCCED3 /* tdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tdb.h; path = include/tdb.h; sourceTree = "<group>"; };
-		2CCE993517E697B700FCCED3 /* samba-3.6.18 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "samba-3.6.18"; sourceTree = "<group>"; };
-		2CCE993617E6C83A00FCCED3 /* smbheader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = smbheader.h; sourceTree = "<group>"; };
 		2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsmbsharemodes.dylib.0; path = lib/libsmbsharemodes.dylib.0; sourceTree = "<group>"; };
-		2CCE993F17E7F30000FCCED3 /* security.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = security.h; sourceTree = "<group>"; };
 		FC06FC0217C7881900032E34 /* sambaclient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sambaclient; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC06FC0517C7881900032E34 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FC06FC0717C7881900032E34 /* sambaclient.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = sambaclient.1; sourceTree = "<group>"; };
@@ -62,26 +54,10 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2CCE992A17E68FA700FCCED3 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				2CCE992B17E68FC000FCCED3 /* libsmbclient.h */,
-				2CCE992C17E68FC000FCCED3 /* netapi.h */,
-				2CCE992D17E68FC000FCCED3 /* smb_share_modes.h */,
-				2CCE992E17E68FC000FCCED3 /* talloc.h */,
-				2CCE992F17E68FC000FCCED3 /* tdb.h */,
-				2CCE993617E6C83A00FCCED3 /* smbheader.h */,
-				2CCE993F17E7F30000FCCED3 /* security.h */,
-			);
-			name = include;
-			sourceTree = "<group>";
-		};
 		FC06FBF917C7881900032E34 = {
 			isa = PBXGroup;
 			children = (
 				2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */,
-				2CCE993517E697B700FCCED3 /* samba-3.6.18 */,
-				2CCE992A17E68FA700FCCED3 /* include */,
 				FC06FC0417C7881900032E34 /* sambaclient */,
 				FC06FC0317C7881900032E34 /* Products */,
 				FCC8CC8D17DD9E6700B0D524 /* lib */,

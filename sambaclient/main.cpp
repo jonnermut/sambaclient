@@ -32,7 +32,7 @@ using namespace std;
 
 const int BUFFER_SIZE = 4096;
 
-int	debuglevel	= 5;
+int	debuglevel	= 0;
 const char	*workgroup	= "NT";
 const char	*username	= "guest";
 const char	*password	= "";
@@ -113,12 +113,13 @@ SMBCCTX* create_smbctx()
 	//smbc_setOptionFallbackAfterKerberos(ctx, 1);
     
     smbc_setOptionNoAutoAnonymousLogin(ctx, 0);
-    smbc_setOptionUseCCache(ctx, 1);
+
     smbc_setOptionSmbEncryptionLevel(ctx, SMBC_ENCRYPTLEVEL_NONE);
     //smbc_setOptionCaseSensitive(ctx, 0);
         
     // one connection per server
-    smbc_setOptionOneSharePerServer(ctx, 1);
+    // causes access violation
+    smbc_setOptionOneSharePerServer(ctx, 0);
     smbc_setOptionUseCCache(ctx, 1);
     return ctx;
 }
@@ -356,11 +357,8 @@ static void print_ace(struct cli_state *cli, FILE *f, struct security_ace *ace)
 void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive, bool acls, bool children, string path)
 {
     TALLOC_CTX *frame = talloc_stackframe();
-    
-    //char buffer[32768 * 10];
-    
+        
     struct stat     st;
-    
     
     SMBCFILE		*fd;
     struct smbc_dirent	*dirent;
@@ -540,7 +538,7 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                 if (filterName.length()>0)
                     break;        
             }
-            
+            //smbc_getFunctionClosedir(ctx)(ctx, dirent);
             
         }
         // close dir try to avoid having open fd handles to prevent OSX from getting upset.
@@ -554,7 +552,7 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
             enumerate(out, ctx, cli, recursive, acls, true, subPath);
         }
     }
-    // do we need to close our cli connection?
+    fprintf(stdout, "end:\n");
     TALLOC_FREE(frame);
 }
 
@@ -564,29 +562,47 @@ void read(string path, SMBCCTX *ctx)
     int fd;
     long ret;
     int savedErrno;
+    struct stat     st;
     
     if ((fd = smbc_open(path.c_str(), O_RDONLY, 0)) < 0)
     {
         printErrorAndExit(errno, path, "Could not open file for reading.", ctx);
     }
-    
-    do
+    else
     {
-        ret = smbc_read(fd, buffer,  BUFFER_SIZE);
-        savedErrno = errno;
-        if (ret > 0)
+            
+        if (smbc_fstat(fd, &st) < 0)
         {
-            fwrite(buffer, 1, ret, stdout);
+            printError(errno, path, "Could not get attributes of path.");
+            
         }
+        else
+        {
+            writeKeyVal(cout, "size", st.st_size);
+            int bytes = 0;
         
-    } while (ret > 0);
-    
-    smbc_close(fd);
-    
-    if (ret < 0)
-    {
-        errno = savedErrno;
-        printErrorAndExit(savedErrno, path, "Error reading file.", ctx);
+            do
+            {
+                ret = smbc_read(fd, buffer,  BUFFER_SIZE);
+                savedErrno = errno;
+                if (ret > 0)
+                {
+                    fwrite(buffer, 1, ret, stdout);
+                    fflush(stdout);
+                    bytes+=ret;
+                }
+                
+            } while (ret > 0);
+            
+            smbc_close(fd);
+            // mark eof on standard err
+            //fprintf(stderr, "eof:");
+            if (ret < 0)
+            {
+                errno = savedErrno;
+                printErrorAndExit(savedErrno, path, "Error reading file.", ctx);
+            }
+        }
     }
 }
 
@@ -629,14 +645,24 @@ void write(string path, SMBCCTX	*ctx)
 
 int main(int argc, const char * argv[])
 {
-    
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+    std::cout << nounitbuf ;
+    std::cerr << nounitbuf ;
     TALLOC_CTX *frame = talloc_stackframe();
     
     string susername;
     string spassword;
     string path;
     string command;
-    
+    if (argc == 3)
+    {
+        susername = argv[1];
+        spassword = argv[2];
+        path = argv[3];
+        command = "wait";
+    }
+    else
     if (argc >= 4)
     {
         susername = argv[1];
@@ -651,68 +677,105 @@ int main(int argc, const char * argv[])
         
     }
     
-
+    if (command == "version")
+    {
+        const char* version = smbc_version();
+        cout << "Samba version: " << version << endl;
+        exit(0);
+    }
+    
     
     workgroup = "";
     username = susername.c_str();
     password = spassword.c_str();
     
-    SMBCCTX	*ctx = create_smbctx();    
+    SMBCCTX	*ctx = create_smbctx();
     
+    // open second connection for apple ACL's - horrible but this is where we ended up
     
-    if (command == "version")
-    {
-        const char* version = smbc_version();
-        cout << "Samba version: " << version << endl;
-    }
-    else if (command.find("enumerate") != string::npos)
-    {
-        bool acls = command.find("acls") != string::npos;
-        bool children = command.find("children") != string::npos;
-        bool recursive = command.find("recursive") != string::npos;
-        
-        
-        // open second connection for apple ACL's - horrible but this is where we ended up
-        
-        struct cli_state *cli = NULL;
-        TALLOC_CTX *frame = talloc_stackframe();
-        // format connection strings
+    struct cli_state *cli = NULL;
 
-        char *server = strtok(strdup(path.substr(6, string::npos).c_str()), "/");
-        char *share = strtok(NULL, "/");
-        // connect if we have enough information
+    // format connection strings
+    
+    char *server = strtok(strdup(path.substr(6, string::npos).c_str()), "/");
+    char *share = strtok(NULL, "/");
+    // connect if we have enough information
+    
+    if (server && share)
+    {
+        cli = connect_one(server, share );
+    }
+    // if the wait flag is set then we wait to accept more commands from stdin..
+    bool wait = false;
+    if (command.find("wait")!= string::npos)
+        wait = true;
+    
+    while (wait)
+    {
+        if (command.empty())
+        {
+           
+
+            std::getline(cin, path);
+            std::getline(cin, command);
         
-        if (server && share)
-        {
-            cli = connect_one(server, share );
         }
-        // if we aren't connecting to a share but enumerating the server then we don't need cli
-        if (!cli && server && share)
+        
+        
+        if (command == "version")
         {
-            // usually a broken pipe
-            printErrorAndExit(-1, path, "Error opening connection to enumerate ACL's.", ctx);
+            const char* version = smbc_version();
+            fprintf(stdout, "Samba version: ");
+            fprintf(stdout, version);
+            fprintf(stdout, "\n");
         }
-        else
+        else if (command.find("enumerate") != string::npos)
         {
-            enumerate(cout, ctx, cli, recursive, acls, children, path);
+            bool acls = command.find("acls") != string::npos;
+            bool children = command.find("children") != string::npos;
+            bool recursive = command.find("recursive") != string::npos;
             
-            if (cli)
-                cli_shutdown(cli);
+            
+                    // if we aren't connecting to a share but enumerating the server then we don't need cli
+            if (!cli && server && share)
+            {
+                // usually a broken pipe
+                printErrorAndExit(-1, path, "Error opening connection to enumerate ACL's.", ctx);
+            }
+            else
+            {
+                enumerate(cout, ctx, cli, recursive, acls, children, path);
+                
+           
+            }
+                       
         }
-        TALLOC_FREE(frame);
-
-        
-    }
-    else if (command == "read")
-    {
-        read(path, ctx);
-    }
-    else if (command == "write")
-    {
-        write(path, ctx);
+        else if (command == "read")
+        {
+            read(path, ctx);
+        }
+        else if (command == "write")
+        {
+            write(path, ctx);
+        }
+        else if (command.find("wait") != string::npos)
+        {
+            // do nothing
+        }
+        else if (command.find("quit") != string::npos)
+        {
+            // break out and terminate
+            break;
+        }
+        // reset command string
+        command.clear();
+        fflush(stdout);
+        fflush(stderr);
     }
     
-
+    
+    if (cli)
+        cli_shutdown(cli);
     
     delete_smbctx(ctx);
     
