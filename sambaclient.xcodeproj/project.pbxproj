@@ -29,6 +29,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2C998FFF17FA750500CE5A50 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
 		2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsmbsharemodes.dylib.0; path = lib/libsmbsharemodes.dylib.0; sourceTree = "<group>"; };
 		FC06FC0217C7881900032E34 /* sambaclient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sambaclient; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC06FC0517C7881900032E34 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -57,6 +58,7 @@
 		FC06FBF917C7881900032E34 = {
 			isa = PBXGroup;
 			children = (
+				2C998FFF17FA750500CE5A50 /* include */,
 				2CCE993C17E6E29600FCCED3 /* libsmbsharemodes.dylib.0 */,
 				FC06FC0417C7881900032E34 /* sambaclient */,
 				FC06FC0317C7881900032E34 /* Products */,
@@ -221,13 +223,7 @@
 		FC06FC0C17C7881900032E34 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					"samba-3.6.18",
-					"samba-3.6.18/source3",
-					"samba-3.6.18/lib",
-					"samba-3.6.18/source3/include",
-					"samba-3.6.18/lib/replace",
-				);
+				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -242,13 +238,7 @@
 		FC06FC0D17C7881900032E34 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					"samba-3.6.18",
-					"samba-3.6.18/source3",
-					"samba-3.6.18/lib",
-					"samba-3.6.18/source3/include",
-					"samba-3.6.18/lib/replace",
-				);
+				HEADER_SEARCH_PATHS = include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
