@@ -24,5 +24,6 @@ install_name_tool -change /usr/local/lib/libnetapi.dylib.0 @executable_path/libn
 
 # zip it up
 
-rm sambaclient.zip
-zip -u sambaclient.zip dist/*
+rm -f sambaclient.zip
+
+zip -j -u sambaclient.zip dist/*
