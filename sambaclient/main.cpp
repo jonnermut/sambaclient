@@ -757,6 +757,9 @@ int main(int argc, const char * argv[])
         else if (command == "write")
         {
             write(path, ctx);
+            // for the moment if we write a file we quit to make life easy.
+            // We could send the content length, if we knew it.
+            break;
         }
         else if (command.find("wait") != string::npos)
         {
