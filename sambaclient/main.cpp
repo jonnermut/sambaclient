@@ -446,7 +446,9 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                             else
                             {
                                 writeKeyVal(out, "size", st.st_size);
-                                writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);                    
+                                writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);
+                                // #define UF_HIDDEN	0x00008000	
+                                writeKeyVal(out, "mode", st.st_mode);
 
                             }
                         }
@@ -655,6 +657,14 @@ int main(int argc, const char * argv[])
     string spassword;
     string path;
     string command;
+    if (argc == 1 )
+    {
+        // one arg assume server address + username + password
+        std::getline(cin, susername);
+        std::getline(cin, spassword);
+        path = argv[1];
+        command = "wait";
+    }
     if (argc == 3)
     {
         susername = argv[1];
