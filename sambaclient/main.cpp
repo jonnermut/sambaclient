@@ -657,7 +657,7 @@ int main(int argc, const char * argv[])
     string spassword;
     string path;
     string command;
-    if (argc == 1 )
+    if (argc == 2 )
     {
         // one arg assume server address + username + password
         std::getline(cin, susername);
@@ -665,13 +665,14 @@ int main(int argc, const char * argv[])
         path = argv[1];
         command = "wait";
     }
+    /*
     else if (argc == 3)
     {
         susername = argv[1];
         spassword = argv[2];
         path = argv[3];
         command = "wait";
-    }
+    }*/
     else
     if (argc >= 4)
     {
