@@ -665,7 +665,7 @@ int main(int argc, const char * argv[])
         path = argv[1];
         command = "wait";
     }
-    if (argc == 3)
+    else if (argc == 3)
     {
         susername = argv[1];
         spassword = argv[2];
