@@ -113,7 +113,7 @@ SMBCCTX* create_smbctx()
 	//smbc_setOptionFallbackAfterKerberos(ctx, 1);
     
     smbc_setOptionNoAutoAnonymousLogin(ctx, 0);
-
+    smbc_setOptionUrlEncodeReaddirEntries(ctx, 1);
     smbc_setOptionSmbEncryptionLevel(ctx, SMBC_ENCRYPTLEVEL_NONE);
     //smbc_setOptionCaseSensitive(ctx, 0);
         
@@ -505,12 +505,16 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                     filePath +=pch;
                                     pch = strtok(NULL, "/");
                                 }
-
+                                // need to url decode for the lower level api''s!!
+                                char* dest = new char[filePath.length()];
+                                smbc_urldecode(dest, const_cast<char*>(filePath.c_str()), filePath.length());
+                                
                                 // we use fprintf C functions from the adapted sample code.
                                 // I could have rewritten it but in the interest of getting it working I left it as is.
                                 fprintf(stdout, "xattrSid: ");
                                 // this gets the security descriptor from the file
-                                security_descriptor* sd = get_secdesc(cli, filePath.c_str());
+                                //security_descriptor* sd = get_secdesc(cli, filePath.c_str());
+                                security_descriptor* sd = get_secdesc(cli, dest);
                                 if (sd)
                                 {                        
                                     // enumerate and print the aces to stdout
