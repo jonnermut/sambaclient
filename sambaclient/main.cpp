@@ -506,8 +506,8 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                     pch = strtok(NULL, "/");
                                 }
                                 // need to url decode for the lower level api''s!!
-                                char* dest = new char[filePath.length()];
-                                smbc_urldecode(dest, const_cast<char*>(filePath.c_str()), filePath.length());
+                                char* dest = new char[filePath.length()+1];
+                                smbc_urldecode(dest, const_cast<char*>(filePath.c_str()), filePath.length()+1);
                                 
                                 // we use fprintf C functions from the adapted sample code.
                                 // I could have rewritten it but in the interest of getting it working I left it as is.
