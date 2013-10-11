@@ -183,12 +183,14 @@ static struct cli_state* connect_one(string server, string share)
         uint32_t flags = 0;
         // apparently we need to zero the sockaddr structure otherwise stuff breaks
         zero_sockaddr(&ss);
-
+        char* sharePath = new char[share.length()+1];
+        smbc_urldecode(sharePath, const_cast<char*>( share.c_str() ), (size_t) share.length()+1);
+        
         // connects to the share - signing state is on
         nt_status = cli_full_connection(&c, "AsdeqDocs Server", server.c_str(),
                                         &ss,
                                         0,
-                                        share.c_str(),
+                                        sharePath,
                                         "?????",
                                         username,
                                         workgroup,
@@ -449,7 +451,10 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                 writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);
                                 // #define UF_HIDDEN	0x00008000	
                                 writeKeyVal(out, "mode", st.st_mode);
-
+                                if (st.st_mode & UF_HIDDEN == UF_HIDDEN)
+                                {
+                                    writeKeyVal(out, "hidden", 1);
+                                }
                             }
                         }
                         // windows seems to have stopped resolving these sid attributes for some reason
@@ -507,8 +512,14 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                 }
                                 // need to url decode for the lower level api''s!!
                                 char* dest = new char[filePath.length()+1];
-                                smbc_urldecode(dest, const_cast<char*>(filePath.c_str()), filePath.length()+1);
-                                
+                                if (filePath.length()>0)
+                                {
+                                    smbc_urldecode(dest, const_cast<char*>(filePath.c_str()), filePath.length()+1);
+                                }
+                                else
+                                {
+                                    dest[0]='\0';
+                                }
                                 // we use fprintf C functions from the adapted sample code.
                                 // I could have rewritten it but in the interest of getting it working I left it as is.
                                 fprintf(stdout, "xattrSid: ");
