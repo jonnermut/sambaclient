@@ -197,7 +197,7 @@ static struct cli_state* connect_one(string server, string share)
                                         password,
                                         flags,
                                         1);
-        
+        delete(sharePath);
         if (NT_STATUS_IS_OK(nt_status))
         {
             return c;
@@ -540,7 +540,7 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                     }
                                 }
                                 fprintf(stdout, "\n");
-                                
+                                delete(dest);
                                 
                             }
                         }
@@ -634,7 +634,7 @@ void write(string path, SMBCCTX	*ctx)
     fd = smbc_open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0);
     if (fd < 0)
     {
-        printErrorAndExit(fd, path, "Could not open file for writing.", ctx);
+        printErrorAndExit(fd, path, "Could not open file for writing. Please check the folder permissions.", ctx);
     }
     
     while(!feof(stdin))
@@ -691,10 +691,16 @@ int main(int argc, const char * argv[])
     else
     if (argc >= 4)
     {
-        susername = argv[1];
-        spassword = argv[2];
+        // url decode username then password
+        char* dest = new char[1024];
+        smbc_urldecode(dest, (char*) argv[1], strlen(argv[1])+1);
+        
+        susername = dest;
+        smbc_urldecode(dest, (char*) argv[2], strlen(argv[2])+1);
+        spassword = dest;
         path = argv[3];
         command = argv[4];
+        delete (dest);
     }
     else
     {
