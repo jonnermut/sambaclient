@@ -451,7 +451,20 @@ void enumerate(ostream& out, SMBCCTX *ctx, struct cli_state *cli, bool recursive
                                 writeKeyVal(out, "lastmod", st.st_mtimespec.tv_sec);
                                 // #define UF_HIDDEN	0x00008000	
                                 writeKeyVal(out, "mode", st.st_mode);
-                                if (st.st_mode & UF_HIDDEN == UF_HIDDEN)
+                                /*
+                                if ((st.st_mode & UF_HIDDEN) == UF_HIDDEN)
+                                {
+                                    writeKeyVal(out, "hidden", 1);
+                                }*/
+                                
+                            }
+                            // get dos attributes
+                            const char* attrName = strdup("system.dos_attr.mode");
+                            char value[5];
+                            int ret = smbc_getxattr(fullPath.c_str(), attrName, value, sizeof(value));
+                            if (ret>=0)
+                            {
+                                if (value[3] & SMBC_DOS_MODE_HIDDEN)
                                 {
                                     writeKeyVal(out, "hidden", 1);
                                 }
@@ -750,7 +763,9 @@ int main(int argc, const char * argv[])
 
             std::getline(cin, path);
             std::getline(cin, command);
-        
+            // if end of stream break and shutdown
+            if (cin.eof())
+                break;
         }
         
         
