@@ -202,6 +202,10 @@ static struct cli_state* connect_one(string server, string share)
         {
             return c;
         }
+        else
+        {
+            printf("\nFailed to open server: smb://%s/%s error: %s\n", server.c_str(), share.c_str(), nt_errstr(nt_status));
+        }
     }
     while (nt_status==NT_STATUS_BROKEN_PIPE && retry < 5);
 	return NULL;
